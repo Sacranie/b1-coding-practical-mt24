@@ -1,10 +1,9 @@
 from __future__ import annotations
 from dataclasses import dataclass
-from turtle import pd
+import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from .terrain import generate_reference_and_limits
-from control import controller
 
 class Submarine:
     def __init__(self):
@@ -117,7 +116,7 @@ class ClosedLoop:
             current_error = mission.reference[t] - observation_t
 
             # I am calling my controller function here
-            actions[t] = controller(previous_error, current_error)
+            actions[t] = self.controller.controller(previous_error, current_error)
 
             # We then need to update out previous error
             previous_error = current_error

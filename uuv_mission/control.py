@@ -1,5 +1,7 @@
-def controller(previous_error, current_error):
-    Kp = 0.15
-    Kd = 0.6
-    control_action = (Kp * current_error) + Kd * (current_error - previous_error)
-    return control_action
+class Control:
+    def __init__(self, Kd=0.15, Kp=0.6):
+        self.Kd = Kd
+        self.Kp = Kp
+    def controller(self,previous_error, current_error):
+        control_action = (self.Kp * current_error) + self.Kd * (current_error - previous_error)
+        return control_action
