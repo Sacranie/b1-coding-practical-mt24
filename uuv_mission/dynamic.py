@@ -1,8 +1,10 @@
 from __future__ import annotations
 from dataclasses import dataclass
+from turtle import pd
 import numpy as np
 import matplotlib.pyplot as plt
 from .terrain import generate_reference_and_limits
+from control import controller
 
 class Submarine:
     def __init__(self):
@@ -26,6 +28,8 @@ class Submarine:
         force_y = -self.drag * self.vel_y + self.actuator_gain * (action + disturbance)
         acc_y = force_y / self.mass
         self.vel_y += acc_y * self.dt
+
+
 
     def get_depth(self) -> float:
         return self.pos_y
@@ -73,17 +77,6 @@ class Mission:
         (reference, cave_height, cave_depth) = generate_reference_and_limits(duration, scale)
         return cls(reference, cave_height, cave_depth)
 
-@dataclass
-class Mission:
-    reference: np.ndarray
-    cave_height: np.ndarray
-    cave_depth: np.ndarray
-
-    @classmethod
-    def random_mission(cls, duration: int, scale: float):
-        (reference, cave_height, cave_depth) = generate_reference_and_limits(duration, scale)
-        return cls(reference, cave_height, cave_depth)
-
     @classmethod
     def from_csv(cls, file_name: str):
         # Read the CSV file
@@ -97,6 +90,7 @@ class Mission:
         # Return a new instance of Mission with the extracted data
         return cls(reference, cave_height, cave_depth)
     
+
 
 
 class ClosedLoop:
@@ -113,11 +107,22 @@ class ClosedLoop:
         positions = np.zeros((T, 2))
         actions = np.zeros(T)
         self.plant.reset_state()
+        previous_error = 0
 
         for t in range(T):
             positions[t] = self.plant.get_position()
             observation_t = self.plant.get_depth()
-            # Call your controller here
+
+            # This will give me the current error
+            current_error = mission.reference[t] - observation_t
+
+            # I am calling my controller function here
+            actions[t] = controller(previous_error, current_error)
+
+            # We then need to update out previous error
+            previous_error = current_error
+
+            # Apply result for control in the transition
             self.plant.transition(actions[t], disturbances[t])
 
         return Trajectory(positions)
