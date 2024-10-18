@@ -73,10 +73,30 @@ class Mission:
         (reference, cave_height, cave_depth) = generate_reference_and_limits(duration, scale)
         return cls(reference, cave_height, cave_depth)
 
+@dataclass
+class Mission:
+    reference: np.ndarray
+    cave_height: np.ndarray
+    cave_depth: np.ndarray
+
+    @classmethod
+    def random_mission(cls, duration: int, scale: float):
+        (reference, cave_height, cave_depth) = generate_reference_and_limits(duration, scale)
+        return cls(reference, cave_height, cave_depth)
+
     @classmethod
     def from_csv(cls, file_name: str):
-        # You are required to implement this method
-        pass
+        # Read the CSV file
+        data = pd.read_csv(file_name)
+        
+        # Extract the relevant columns from the file
+        reference = data['reference'].values
+        cave_height = data['cave_height'].values
+        cave_depth = data['cave_depth'].values
+
+        # Return a new instance of Mission with the extracted data
+        return cls(reference, cave_height, cave_depth)
+    
 
 
 class ClosedLoop:
